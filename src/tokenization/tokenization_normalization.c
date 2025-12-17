@@ -6,7 +6,7 @@
 /*   By: dbakker <dbakker@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/18 15:18:05 by elie              #+#    #+#             */
-/*   Updated: 2025/12/08 16:28:58 by dbakker          ###   ########.fr       */
+/*   Updated: 2025/12/17 13:49:04 by dbakker          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,18 @@
 static int	tokenization_in_quote(const char *str, int8_t curr,
 	int8_t next)
 {
-	if (curr == TYPE_ARG && (next == TYPE_PIPE || get_redirection_type(str)))
+	uint8_t	is_redir_curr;
+	uint8_t	is_redir_next;
+
+	is_redir_curr = get_redirection_type(str - 1);
+	is_redir_next = get_redirection_type(str);
+	if ((curr == TYPE_ARG || curr == TYPE_SQUOTE || curr == TYPE_DQUOTE)
+		&& (next == TYPE_PIPE || is_redir_next))
 		return (' ');
-	else if ((curr == TYPE_PIPE || get_redirection_type(str - 1))
-		&& next == TYPE_ARG)
+	if ((curr == TYPE_PIPE || is_redir_curr)
+		&& (next == TYPE_ARG || next == TYPE_SQUOTE || next == TYPE_DQUOTE))
 		return (' ');
-	else if (curr == TYPE_PIPE && get_redirection_type(str))
-		return (' ');
-	else if ((curr == TYPE_SQUOTE || curr == TYPE_DQUOTE)
-		&& (next == TYPE_PIPE || get_redirection_type(str)))
-		return (' ');
-	else if ((curr == TYPE_PIPE || get_redirection_type(str - 1))
-		&& (next == TYPE_SQUOTE || next == TYPE_DQUOTE))
+	if (curr == TYPE_PIPE && is_redir_next)
 		return (' ');
 	return (0);
 }
@@ -69,7 +69,7 @@ char	*normalize_whitespace(const char *str)
 
 	new_str = ft_calloc(get_normalized_str_len(str) + 1, sizeof(char));
 	if (new_str == NULL)
-		return (NULL);
+		return (perror("minishell"), NULL);
 	tokenization_normalize(new_str, str);
 	return (new_str);
 }

@@ -6,7 +6,7 @@
 /*   By: dbakker <dbakker@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:08:30 by ebelle            #+#    #+#             */
-/*   Updated: 2025/12/11 19:08:11 by dbakker          ###   ########.fr       */
+/*   Updated: 2025/12/17 13:54:55 by dbakker          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ void	tokenization_update_tokens(const char *str, int8_t *curr_type,
 			int8_t *next_type);
 
 // tokenization.c
+
 void	tokenize(t_data *data, size_t token_count);
 size_t	set_tokens(t_data *data);
 size_t	count_tokens(char *input);
@@ -104,6 +105,8 @@ void	handle_pipe_creation(t_cmd *current, t_pnp *pnp, t_data *data,
 void	fork_and_execute(t_cmd *current, t_pnp *pnp, size_t i, t_data *data);
 
 // Signal handling
+
+extern volatile sig_atomic_t	g_signal;
 
 void	setup_signals_interactive(void);
 void	setup_signals_executing(void);
