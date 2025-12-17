@@ -1,0 +1,83 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   execution_builtins.c                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: elie <elie@student.42.fr>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/05 15:22:00 by elie              #+#    #+#             */
+/*   Updated: 2025/12/10 10:21:07 by elie             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "minishell.h"
+
+static void	handle_redir_error(int saved_stdin, int saved_stdout, t_data *data);
+
+static void	close_stdin_stdout(int saved_stdin, int saved_stdout)
+{
+	close(saved_stdin);
+	close(saved_stdout);
+}
+
+int	execute_builtin(t_cmd *cmd, t_data *data)
+{
+	if (ft_strcmp(cmd->args[0], "echo") == 0)
+		return (data->exit_status = builtin_echo((const char **)cmd->args + 1));
+	if (ft_strcmp(cmd->args[0], "cd") == 0)
+		return (data->exit_status = builtin_cd(data->envp, &data->directory,
+				cmd->args[1]));
+	if (ft_strcmp(cmd->args[0], "pwd") == 0)
+		return (data->exit_status = pwd_print(data->directory));
+	if (ft_strcmp(cmd->args[0], "export") == 0)
+		return (handle_export(cmd, data), data->exit_status);
+	if (ft_strcmp(cmd->args[0], "unset") == 0)
+		return (data->exit_status = builtin_unset(&data->envp, cmd->args));
+	if (ft_strcmp(cmd->args[0], "env") == 0)
+		return (data->exit_status = builtin_env_print(data->envp));
+	if (ft_strcmp(cmd->args[0], "exit") == 0)
+		builtin_exit(cmd, data);
+	return (data->exit_status);
+}
+
+static void	restore_stdio(int saved_stdin, int saved_stdout)
+{
+	dup2(saved_stdin, STDIN_FILENO);
+	dup2(saved_stdout, STDOUT_FILENO);
+	close_stdin_stdout(saved_stdin, saved_stdout);
+}
+
+void	handle_single_builtin(t_cmd *cmd, t_data *data)
+{
+	int	saved_stdin;
+	int	saved_stdout;
+
+	saved_stdin = dup(STDIN_FILENO);
+	saved_stdout = dup(STDOUT_FILENO);
+	if (saved_stdin == -1 || saved_stdout == -1)
+	{
+		handle_redir_error(saved_stdin, saved_stdout, data);
+		return ;
+	}
+	if (apply_redirections(cmd) == FAILURE)
+	{
+		close_stdin_stdout(saved_stdin, saved_stdout);
+		data->exit_status = 1;
+		return ;
+	}
+	if (ft_strcmp(cmd->args[0], "exit") == 0)
+		restore_stdio(saved_stdin, saved_stdout);
+	data->exit_status = execute_builtin(cmd, data);
+	if (ft_strcmp(cmd->args[0], "exit") != 0)
+		restore_stdio(saved_stdin, saved_stdout);
+}
+
+static void	handle_redir_error(int saved_stdin, int saved_stdout, t_data *data)
+{
+	perror("minishell: dup");
+	if (saved_stdin != -1)
+		close(saved_stdin);
+	if (saved_stdout != -1)
+		close(saved_stdout);
+	data->exit_status = 1;
+}
