@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ebelle <ebelle@student.42.fr>              +#+  +:+       +#+        */
+/*   By: dbakker <dbakker@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/08 17:15:33 by ebelle            #+#    #+#             */
-/*   Updated: 2025/12/11 19:34:55 by ebelle           ###   ########.fr       */
+/*   Updated: 2025/12/17 14:25:50 by dbakker          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ uint8_t	set_input(t_data *data)
 	if (!data->input)
 		exit_cleanup(data, 0);
 	if (!data->input[0] || ft_strlen(data->input) == 0)
-		return (free(data->input), FAILURE);
+		return (data->exit_status = 0, free(data->input), FAILURE);
 	len = 0;
 	while (data->input[len] && ft_isspace(data->input[len]))
 		len++;
